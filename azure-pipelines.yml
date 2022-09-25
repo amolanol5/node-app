@@ -21,12 +21,12 @@ stages:
 
           - script: |
               yarn install
-              yarn run build
+       #       yarn run build
             displayName: "yarn install and build"
 
           - task: ArchiveFiles@2
             inputs:
-              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/dist"
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/*"
               includeRootFolder: false
               archiveType: "zip"
               archiveFile: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip"
