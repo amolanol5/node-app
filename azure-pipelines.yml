@@ -40,31 +40,31 @@ stages:
             displayName: Publish build artifacts
 
   - stage: Deploy
-      displayName: Deploy amplify
-      jobs:
-        - job: Deploy
-          displayName: Deploy
-          steps:
-            - task: DownloadBuildArtifacts@0
-              displayName: "Download Build Artifacts"
-              inputs:
-                artifactName: $(Build.BuildId)
-                downloadPath: $(System.DefaultWorkingDirectory)
+    displayName: Deploy amplify
+    jobs:
+      - job: Deploy
+        displayName: Deploy
+        steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: "Download Build Artifacts"
+            inputs:
+              artifactName: $(Build.BuildId)
+              downloadPath: $(System.DefaultWorkingDirectory)
 
-            - task: AWSShellScript@1
-              inputs:
-                awsCredentials: AWS AMOLANO ENV
-                regionName: $(AwsRegion)
-                scriptType: "inline"
-                failOnStandardError: true
-                inlineScript: |
-                  export DEPLOY_RES=$(aws amplify create-deployment --app-id $(AmplifyAppId) --branch-name $(AmplifyBranchName) --no-cli-pager)
-                  export DEPLOY_JOB_ID=$(echo $DEPLOY_RES | jq -r ".jobId")
-                  export DEPLOY_URL=$(echo $DEPLOY_RES | jq -r ".zipUploadUrl")
+          - task: AWSShellScript@1
+            inputs:
+              awsCredentials: AWS AMOLANO ENV
+              regionName: $(AwsRegion)
+              scriptType: "inline"
+              failOnStandardError: true
+              inlineScript: |
+                export DEPLOY_RES=$(aws amplify create-deployment --app-id $(AmplifyAppId) --branch-name $(AmplifyBranchName) --no-cli-pager)
+                export DEPLOY_JOB_ID=$(echo $DEPLOY_RES | jq -r ".jobId")
+                export DEPLOY_URL=$(echo $DEPLOY_RES | jq -r ".zipUploadUrl")
 
-                  curl -s --location --request PUT "$DEPLOY_URL" \
-                      --header 'Content-Type: application/zip' \
-                      --data-binary '@/$(System.DefaultWorkingDirectory)/$(Build.BuildId)/$(Build.BuildId).zip'
+                curl -s --location --request PUT "$DEPLOY_URL" \
+                    --header 'Content-Type: application/zip' \
+                    --data-binary '@/$(System.DefaultWorkingDirectory)/$(Build.BuildId)/$(Build.BuildId).zip'
 
-                  aws amplify start-deployment --app-id $(AmplifyAppId) --branch-name $(AmplifyBranchName) --job-id $DEPLOY_JOB_ID
-              displayName: Create Amplify Deployment
+                aws amplify start-deployment --app-id $(AmplifyAppId) --branch-name $(AmplifyBranchName) --job-id $DEPLOY_JOB_ID
+            displayName: Create Amplify Deployment
